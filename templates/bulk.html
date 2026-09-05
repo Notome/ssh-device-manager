@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Массовые операции</h1>
+        <p class="page-sub">Отправка команды или выгрузка конфигов сразу на несколько устройств</p>
+    </div>
+</div>
+
+<!-- Device selector -->
+<div class="section-block">
+    <div class="section-block-title">
+        <i class="fas fa-server"></i> Выберите устройства
+        <div style="display:flex; gap:7px; margin-left:auto;">
+            <button type="button" onclick="selectAll()" class="btn btn-secondary" style="padding:5px 12px; font-size:0.8rem;">Все</button>
+            <button type="button" onclick="deselectAll()" class="btn btn-secondary" style="padding:5px 12px; font-size:0.8rem;">Снять</button>
+        </div>
+    </div>
+
+    <form method="POST" action="/bulk" id="bulk-form">
+        <div class="device-check-grid">
+            {% for d in devices %}
+            <label class="device-check-item {% if d.blocked %}blocked{% endif %}" id="lbl-{{ d.id }}">
+                <input type="checkbox" name="device_ids" value="{{ d.id }}"
+                       {% if d.blocked %}disabled{% endif %}>
+                <div style="flex:1; min-width:0;">
+                    <div class="dci-name">{{ d.name }}</div>
+                    <div class="dci-meta">{{ d.ip }} · {{ os_labels.get(d.os_type, d.os_type or '—') }}</div>
+                </div>
+                <span class="status {{ d.status }}" style="font-size:0.68rem; padding:2px 7px; flex-shrink:0;">
+                    <span class="dot"></span>{{ d.status|upper }}
+                </span>
+            </label>
+            {% else %}
+            <p style="color:var(--text-3); grid-column:1/-1;">Нет добавленных устройств.</p>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top:12px; font-size:0.82rem; color:var(--text-3);">
+            Выбрано: <strong id="count-num" style="color:var(--text-2);">0</strong> устройств
+        </div>
+
+        <!-- Send command -->
+        <div style="border-top:1px solid var(--border); margin-top:20px; padding-top:20px;">
+            <div class="section-block-title" style="border:none; padding:0; margin-bottom:14px;">
+                <i class="fas fa-paper-plane"></i> Команда для отправки
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="form-group" style="flex:1; min-width:240px; margin:0;">
+                    <input type="text" name="command" id="cmd-input" class="form-input"
+                           placeholder="show running-config / display current-configuration / ..."
+                           value="{{ command_used or '' }}">
+                </div>
+                <button type="submit" class="btn" style="padding:9px 22px; flex-shrink:0;">
+                    <i class="fas fa-paper-plane"></i> Отправить на все
+                </button>
+            </div>
+            <p style="margin:8px 0 0; font-size:0.8rem; color:var(--text-3);">
+                Команда выполнится на каждом выбранном устройстве через Netmiko. Все результаты сохранятся в историю.
+            </p>
+        </div>
+    </form>
+</div>
+
+<!-- Export block -->
+<div class="section-block" style="border-color: rgba(56,189,248,0.15);">
+    <div class="section-block-title">
+        <i class="fas fa-file-zipper" style="color:var(--primary);"></i> Выгрузить конфиги
+    </div>
+    <p style="font-size:0.86rem; color:var(--text-2); margin:0 0 16px;">
+        Выполнит <code style="background:var(--bg-2); padding:2px 7px; border-radius:5px; border:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--primary);">show running-config</code>
+        (или аналог для каждой ОС) на выбранных устройствах и упакует всё в ZIP-архив.
+    </p>
+    <form method="POST" action="/bulk/export" id="export-form">
+        <div id="export-devices-container"></div>
+        <button type="submit" class="btn btn-secondary" style="border-color:rgba(56,189,248,0.25); color:var(--primary);">
+            <i class="fas fa-download"></i> Скачать конфиги (ZIP)
+        </button>
+    </form>
+</div>
+
+<!-- Results -->
+{% if results %}
+<div class="section-block">
+    <div class="section-block-title">
+        <i class="fas fa-list-check"></i> Результаты
+        <span style="font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--text-2); font-weight:400; text-transform:none; letter-spacing:0; margin-left:6px;">{{ command_used }}</span>
+    </div>
+    <div class="history-list">
+        {% for r in results %}
+        <div class="history-item">
+            <div class="history-header">
+                <span class="history-command">
+                    <i class="fas fa-server" style="font-size:0.78rem;"></i>
+                    {{ r.name }}
+                    <span style="color:var(--text-3); font-size:0.8rem; font-family:'JetBrains Mono',monospace;">({{ r.ip }})</span>
+                </span>
+                <span class="status {% if r.success %}online{% else %}offline{% endif %}" style="font-size:0.72rem; padding:3px 10px;">
+                    {% if r.success %}<i class="fas fa-check"></i> Успешно{% else %}<i class="fas fa-times"></i> Ошибка{% endif %}
+                </span>
+            </div>
+            {% if r.output %}
+            <pre class="history-output" style="max-height:250px;">{{ r.output }}</pre>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+function syncCount() {
+    const checked = document.querySelectorAll('#bulk-form input[name="device_ids"]:checked');
+    document.getElementById('count-num').textContent = checked.length;
+    const container = document.getElementById('export-devices-container');
+    container.innerHTML = '';
+    checked.forEach(cb => {
+        const h = document.createElement('input');
+        h.type = 'hidden'; h.name = 'device_ids'; h.value = cb.value;
+        container.appendChild(h);
+    });
+    document.querySelectorAll('.device-check-item').forEach(lbl => {
+        const cb = lbl.querySelector('input[type=checkbox]');
+        if (cb && cb.checked) lbl.style.borderColor = 'rgba(56,189,248,0.5)';
+        else if (!lbl.classList.contains('blocked')) lbl.style.borderColor = '';
+    });
+}
+document.querySelectorAll('#bulk-form input[name="device_ids"]').forEach(cb => cb.addEventListener('change', syncCount));
+function selectAll()   { document.querySelectorAll('#bulk-form input[name="device_ids"]:not(:disabled)').forEach(cb => cb.checked = true);  syncCount(); }
+function deselectAll() { document.querySelectorAll('#bulk-form input[name="device_ids"]').forEach(cb => cb.checked = false); syncCount(); }
+syncCount();
+</script>
+{% endblock %}

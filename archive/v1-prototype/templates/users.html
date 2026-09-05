@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="header">
+    <h1><i class="fas fa-users-cog"></i> Управление пользователями</h1>
+    <a href="/users/add" class="btn">
+        <i class="fas fa-user-plus"></i> Добавить пользователя
+    </a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>Роль</th>
+            <th>Заблокированные IP</th>
+            <th>Создан</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>
+                <strong>{{ u.login }}</strong>
+                {% if u.id == session.get('user_id') %}
+                    <span style="color: #22d3ee; font-size:0.8rem;"> (вы)</span>
+                {% endif %}
+            </td>
+            <td>
+                <span class="role-badge role-{{ u.role }}">
+                    {% if u.role == 'admin' %}<i class="fas fa-crown"></i>{% else %}<i class="fas fa-user"></i>{% endif %}
+                    {{ u.role }}
+                </span>
+            </td>
+            <td>
+                {% if u.blocked_ips %}
+                    <span style="color: #ef4444; font-size: 0.9rem;">
+                        <i class="fas fa-ban"></i> {{ u.blocked_ips }}
+                    </span>
+                {% else %}
+                    <span style="color: #64748b;">—</span>
+                {% endif %}
+            </td>
+            <td style="color: #64748b; font-size: 0.9rem;">{{ u.created_at }}</td>
+            <td>
+                <a href="/users/edit/{{ u.id }}" class="btn" style="padding: 6px 14px; font-size: 0.9rem;">
+                    <i class="fas fa-edit"></i> Изменить
+                </a>
+                {% if u.id != session.get('user_id') %}
+                <a href="/users/delete/{{ u.id }}" 
+                   onclick="return confirm('Удалить пользователя {{ u.login }}?')"
+                   style="margin-left: 10px; color: #ef4444; font-size: 1.2rem;">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

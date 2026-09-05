@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin-bottom:22px;">
+    <a href="/" class="btn btn-secondary" style="padding:7px 14px; font-size:0.84rem;">
+        <i class="fas fa-arrow-left"></i> Назад
+    </a>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Редактировать устройство</h1>
+        <p class="page-sub">{{ device.name }} &nbsp;·&nbsp; {{ device.ip }}</p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" name="name" class="form-input" value="{{ device.name }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">IP-адрес</label>
+                <input type="text" name="ip" class="form-input" value="{{ device.ip }}" required>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Тип устройства</label>
+                <input type="text" name="type" class="form-input" value="{{ device.type or '' }}" placeholder="Switch, Router...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Операционная система</label>
+                <select name="os_type" class="form-select">
+                    {% for key, label in os_labels.items() %}
+                    <option value="{{ key }}" {% if device.os_type == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Логин SSH</label>
+                <input type="text" name="username" class="form-input" value="{{ device.username or '' }}" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль SSH</label>
+                <input type="password" name="password" class="form-input" value="{{ device.password or '' }}" placeholder="••••••••">
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom:26px;">
+            <label class="form-label">Статус</label>
+            <select name="status" class="form-select" style="width:180px;">
+                <option value="offline" {% if device.status == 'offline' %}selected{% endif %}>Offline</option>
+                <option value="online"  {% if device.status == 'online'  %}selected{% endif %}>Online</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn" style="padding:10px 28px;">
+                <i class="fas fa-floppy-disk"></i> Сохранить
+            </button>
+            <a href="/" class="btn btn-secondary" style="padding:10px 20px;">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

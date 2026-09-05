@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <a href="/" class="sidebar-logo">
+            <div class="logo-icon"><i class="fas fa-terminal"></i></div>
+            <div>
+                <div class="logo-text">SSH Manager</div>
+                <div class="logo-sub">Network Panel</div>
+            </div>
+        </a>
+
+        <nav class="sidebar-nav">
+            <span class="nav-section">Основное</span>
+            <a href="/"        {% if request.path == '/'        %}class="active"{% endif %}>
+                <i class="fas fa-chart-tree-map"></i> Дашборд
+            </a>
+            <a href="/add"     {% if request.path == '/add'     %}class="active"{% endif %}>
+                <i class="fas fa-plus"></i> Добавить устройство
+            </a>
+            <a href="/history" {% if request.path == '/history' %}class="active"{% endif %}>
+                <i class="fas fa-clock-rotate-left"></i> История команд
+            </a>
+            <a href="/bulk"    {% if request.path.startswith('/bulk') %}class="active"{% endif %}>
+                <i class="fas fa-layer-group"></i> Массовые операции
+            </a>
+
+            {% if session.get('role') == 'admin' %}
+            <span class="nav-section">Администрирование</span>
+            <a href="/users"   {% if request.path.startswith('/users') %}class="active"{% endif %}>
+                <i class="fas fa-users"></i> Пользователи
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user-card">
+                <div class="user-avatar">
+                    <i class="fas fa-{% if session.get('role') == 'admin' %}crown{% else %}user{% endif %}"></i>
+                </div>
+                <div class="user-info">
+                    <div class="u-name">{{ session.get('login', '') }}</div>
+                    <span class="role-badge role-{{ session.get('role', 'user') }}">{{ session.get('role', '') }}</span>
+                </div>
+            </div>
+            <a href="/logout" class="logout-btn">
+                <i class="fas fa-arrow-right-from-bracket"></i> Выйти из системы
+            </a>
+        </div>
+    </aside>
+
+    <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+</div>
+</body>
+</html>

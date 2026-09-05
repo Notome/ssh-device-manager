@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin-bottom:22px;">
+    <a href="/" class="btn btn-secondary" style="padding:7px 14px; font-size:0.84rem;">
+        <i class="fas fa-arrow-left"></i> Назад
+    </a>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Добавить устройство</h1>
+        <p class="page-sub">Заполните параметры подключения</p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" name="name" class="form-input" placeholder="Router-01" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">IP-адрес</label>
+                <input type="text" name="ip" class="form-input" placeholder="192.168.1.1" required>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Тип устройства</label>
+                <input type="text" name="type" class="form-input" placeholder="Switch, Router, Firewall...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Операционная система</label>
+                <select name="os_type" class="form-select">
+                    {% for key, label in os_labels.items() %}
+                    <option value="{{ key }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Логин SSH</label>
+                <input type="text" name="username" class="form-input" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль SSH</label>
+                <input type="password" name="password" class="form-input" placeholder="••••••••">
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom:26px;">
+            <label class="form-label">Начальный статус</label>
+            <select name="status" class="form-select" style="width:180px;">
+                <option value="offline">Offline</option>
+                <option value="online">Online</option>
+            </select>
+        </div>
+        <button type="submit" class="btn" style="padding:10px 28px;">
+            <i class="fas fa-plus"></i> Добавить устройство
+        </button>
+    </form>
+</div>
+
+{% endblock %}

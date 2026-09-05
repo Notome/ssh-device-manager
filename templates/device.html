@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin-bottom:24px;">
+    <a href="/" class="btn btn-secondary" style="padding:7px 14px; font-size:0.84rem;">
+        <i class="fas fa-arrow-left"></i> Назад
+    </a>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ device.name }}</h1>
+        <p class="page-sub">{{ os_labels.get(device.os_type, device.os_type) }} &nbsp;·&nbsp; {{ device.ip }}</p>
+    </div>
+    <span class="status {{ device.status }}" style="font-size:0.82rem; padding:6px 14px;">
+        <span class="dot"></span> {{ device.status|upper }}
+    </span>
+</div>
+
+<!-- Meta info -->
+<div class="device-meta-grid">
+    <div class="device-meta-item">
+        <div class="meta-label"><i class="fas fa-globe" style="margin-right:5px;"></i>IP-адрес</div>
+        <div class="meta-value" style="font-family:'JetBrains Mono',monospace;">{{ device.ip }}</div>
+    </div>
+    <div class="device-meta-item">
+        <div class="meta-label"><i class="fas fa-tag" style="margin-right:5px;"></i>Тип</div>
+        <div class="meta-value">{{ device.type or '—' }}</div>
+    </div>
+    <div class="device-meta-item">
+        <div class="meta-label"><i class="fas fa-microchip" style="margin-right:5px;"></i>Операционная система</div>
+        <div class="meta-value">{{ os_labels.get(device.os_type, device.os_type) }}</div>
+    </div>
+    <div class="device-meta-item">
+        <div class="meta-label"><i class="fas fa-user" style="margin-right:5px;"></i>Логин SSH</div>
+        <div class="meta-value" style="font-family:'JetBrains Mono',monospace;">{{ device.username or '—' }}</div>
+    </div>
+</div>
+
+<!-- Quick commands -->
+<div class="section-block">
+    <div class="section-block-title">
+        <i class="fas fa-bolt"></i> Быстрые команды
+    </div>
+    <div class="quick-commands">
+        {% for cmd in quick_commands %}
+        <button class="quick-cmd-btn" onclick="setCommand(this)" data-cmd="{{ cmd }}">{{ cmd }}</button>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Command form -->
+<div class="section-block">
+    <div class="section-block-title">
+        <i class="fas fa-terminal"></i> Выполнить команду
+    </div>
+    <form method="POST" id="cmd-form">
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+            <div class="form-group" style="flex:1; margin:0;">
+                <label class="form-label">Команда</label>
+                <input type="text" name="command" id="cmd-input" class="form-input"
+                       placeholder="show version / ip addr / display interface brief"
+                       value="{{ command_used or '' }}" required>
+            </div>
+            <button type="submit" class="btn" style="margin-bottom:0; padding:9px 20px; flex-shrink:0;">
+                <i class="fas fa-paper-plane"></i> Выполнить
+            </button>
+        </div>
+    </form>
+
+    {% if output %}
+    <div style="margin-top:20px;">
+        <div style="font-size:0.78rem; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-3); margin-bottom:8px;">
+            Результат &nbsp;<code style="font-family:'JetBrains Mono',monospace; background:var(--bg-2); padding:2px 7px; border-radius:4px; border:1px solid var(--border); color:var(--text-2);">{{ command_used }}</code>
+        </div>
+        <pre class="terminal">{{ output }}</pre>
+    </div>
+    {% endif %}
+</div>
+
+<!-- History -->
+{% if history %}
+<div class="section-block">
+    <div class="section-block-title">
+        <i class="fas fa-clock-rotate-left"></i> Последние команды
+    </div>
+    <div class="history-list">
+        {% for cmd in history %}
+        <div class="history-item">
+            <div class="history-header">
+                <span class="history-command"><i class="fas fa-chevron-right"></i> {{ cmd.command }}</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span class="status {% if cmd.success %}online{% else %}offline{% endif %}" style="font-size:0.7rem; padding:2px 8px;">
+                        {% if cmd.success %}OK{% else %}ERR{% endif %}
+                    </span>
+                    <span class="history-time">{{ cmd.executed_at }}</span>
+                </div>
+            </div>
+            {% if cmd.output %}
+            <pre class="history-output">{{ cmd.output[:300] }}{% if cmd.output|length > 300 %}…{% endif %}</pre>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+function setCommand(btn) {
+    document.getElementById('cmd-input').value = btn.getAttribute('data-cmd');
+    document.getElementById('cmd-input').focus();
+}
+</script>
+
+{% endblock %}

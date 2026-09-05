@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin-bottom:22px;">
+    <a href="/users" class="btn btn-secondary" style="padding:7px 14px; font-size:0.84rem;">
+        <i class="fas fa-arrow-left"></i> Назад
+    </a>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{% if action == 'add' %}Добавить пользователя{% else %}Редактировать пользователя{% endif %}</h1>
+        {% if user %}<p class="page-sub">{{ user.login }}</p>{% endif %}
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div class="form-group">
+                <label class="form-label">Логин</label>
+                <input type="text" name="login" class="form-input"
+                       value="{{ user.login if user else '' }}"
+                       placeholder="username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+                <input type="password" name="password" class="form-input"
+                       value="{{ user.password if user else '' }}"
+                       placeholder="••••••••" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Роль</label>
+            <select name="role" class="form-select" style="width:200px;">
+                <option value="user"  {% if user and user.role == 'user'  %}selected{% endif %}>Пользователь</option>
+                <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>Администратор</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom:26px;">
+            <label class="form-label">Заблокированные IP</label>
+            <input type="text" name="blocked_ips" class="form-input"
+                   value="{{ user.blocked_ips if user else '' }}"
+                   placeholder="192.168.1.1, 10.0.0.1">
+            <div style="font-size:0.78rem; color:var(--text-3); margin-top:5px;">
+                Перечислите через запятую IP-адреса, к которым пользователь не должен иметь доступа
+            </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn" style="padding:10px 26px;">
+                <i class="fas fa-{% if action == 'add' %}plus{% else %}floppy-disk{% endif %}"></i>
+                {% if action == 'add' %}Создать{% else %}Сохранить{% endif %}
+            </button>
+            <a href="/users" class="btn btn-secondary" style="padding:10px 20px;">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

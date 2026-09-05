@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="header">
+    <h1>Сетевые устройства</h1>
+    <a href="/refresh_status" class="btn">
+        <i class="fas fa-sync-alt"></i> Обновить статусы
+    </a>
+</div>
+
+<div class="search-filter-bar">
+    <form method="GET" action="/" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+        <input type="text" name="search" class="form-input" 
+               placeholder="Поиск по имени или IP..." 
+               value="{{ current_search }}" style="flex: 1; min-width: 300px;">
+
+        <select name="type" class="form-select" onchange="this.form.submit()">
+            <option value="">Все типы</option>
+            {% for dtype in device_types %}
+                <option value="{{ dtype }}" {% if current_type == dtype %}selected{% endif %}>{{ dtype }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">Все статусы</option>
+            <option value="online" {% if current_status == 'online' %}selected{% endif %}>Online</option>
+            <option value="offline" {% if current_status == 'offline' %}selected{% endif %}>Offline</option>
+        </select>
+
+        <button type="submit" class="btn">
+            <i class="fas fa-search"></i> Найти
+        </button>
+
+        {% if current_search or current_type or current_status %}
+            <a href="/" class="btn" style="background: #64748b;">Сбросить</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="cards">
+    <div class="card">
+        <i class="fas fa-circle-check"></i>
+        <h3>Онлайн</h3>
+        <p>{{ stats.online }}</p>
+    </div>
+    <div class="card">
+        <i class="fas fa-circle-xmark"></i>
+        <h3>Оффлайн</h3>
+        <p>{{ stats.offline }}</p>
+    </div>
+    <div class="card">
+        <i class="fas fa-network-wired"></i>
+        <h3>Всего</h3>
+        <p>{{ stats.total }}</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>IP-адрес</th>
+            <th>Тип / ОС</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in devices %}
+        <tr {% if d.blocked %}class="row-blocked"{% endif %}>
+            <td><strong>{{ d.name }}</strong></td>
+            <td>{{ d.ip }}</td>
+            <td>
+                <span style="color: #94a3b8;">{{ d.type or '—' }}</span>
+                {% if d.os_type %}
+                    <br><small style="color: #64748b;">{{ d.os_type }}</small>
+                {% endif %}
+            </td>
+            <td>
+                <span class="status {{ d.status }}">
+                    <i class="fas fa-circle"></i> {{ d.status|upper }}
+                </span>
+            </td>
+            <td>
+                {% if d.blocked %}
+                    <span class="access-denied-badge"><i class="fas fa-ban"></i> Access Denied</span>
+                {% else %}
+                    <a href="/device/{{ d.id }}" class="btn" style="padding: 8px 18px; font-size: 0.95rem;">
+                        <i class="fas fa-terminal"></i> Управлять
+                    </a>
+                {% endif %}
+                <a href="/edit/{{ d.id }}" style="margin-left: 12px; color: #94a3b8; font-size: 1.3rem;">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="/delete/{{ d.id }}" onclick="return confirm('Удалить {{ d.name }}?')" 
+                   style="margin-left: 12px; color: #ef4444; font-size: 1.3rem;">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" style="text-align: center; padding: 80px; color: #64748b;">
+                Устройств пока нет. Добавьте первое устройство.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

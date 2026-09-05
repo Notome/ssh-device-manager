@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Пользователи</h1>
+        <p class="page-sub">Управление учётными записями</p>
+    </div>
+    <a href="/users/add" class="btn">
+        <i class="fas fa-plus"></i> Добавить пользователя
+    </a>
+</div>
+
+<div class="table-wrap">
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>Логин</th>
+                <th>Роль</th>
+                <th>Заблокированные IP</th>
+                <th>Создан</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>
+                    <div style="display:flex; align-items:center; gap:9px;">
+                        <div style="width:28px; height:28px; border-radius:7px; background:var(--primary-glow); border:1px solid rgba(56,189,248,0.2); display:flex; align-items:center; justify-content:center; font-size:0.78rem; color:var(--primary);">
+                            <i class="fas fa-{% if u.role == 'admin' %}crown{% else %}user{% endif %}"></i>
+                        </div>
+                        <strong>{{ u.login }}</strong>
+                        {% if u.id == session.get('user_id') %}
+                            <span style="font-size:0.72rem; color:var(--text-3); background:var(--surface-2); padding:1px 7px; border-radius:99px; border:1px solid var(--border);">Вы</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td><span class="role-badge role-{{ u.role }}">{{ u.role }}</span></td>
+                <td>
+                    {% if u.blocked_ips %}
+                        <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                        {% for ip in u.blocked_ips.split(',') %}
+                            {% if ip.strip() %}
+                            <code style="font-family:'JetBrains Mono',monospace; font-size:0.78rem; background:var(--bg-2); padding:2px 7px; border-radius:5px; border:1px solid var(--border); color:var(--red);">{{ ip.strip() }}</code>
+                            {% endif %}
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                        <span style="color:var(--text-3); font-size:0.83rem;">—</span>
+                    {% endif %}
+                </td>
+                <td style="color:var(--text-2); font-size:0.83rem;">{{ u.created_at or '—' }}</td>
+                <td>
+                    <div style="display:flex; gap:6px;">
+                        <a href="/users/edit/{{ u.id }}" class="btn btn-secondary" style="padding:6px 12px; font-size:0.82rem;">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        {% if u.id != session.get('user_id') %}
+                        <a href="/users/delete/{{ u.id }}" class="btn btn-danger" style="padding:6px 12px; font-size:0.82rem;"
+                           onclick="return confirm('Удалить пользователя {{ u.login }}?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

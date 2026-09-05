@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="header">
+    <h1><i class="fas fa-history"></i> История команд</h1>
+</div>
+
+{% if history %}
+<div class="history-container">
+    {% for cmd in history %}
+    <div class="history-item">
+        <div class="history-header">
+            <span class="history-command">
+                <i class="fas fa-terminal"></i> {{ cmd.command }}
+            </span>
+            <span style="display:flex; gap:16px; align-items:center;">
+                <span style="color: #22d3ee; font-size:0.9rem;">
+                    <i class="fas fa-server"></i> {{ cmd.device_name }} ({{ cmd.device_ip }})
+                </span>
+                <span class="history-time">{{ cmd.executed_at }}</span>
+                <span class="status {% if cmd.success %}online{% else %}offline{% endif %}" style="font-size:0.8rem; padding:2px 8px;">
+                    {% if cmd.success %}OK{% else %}ERR{% endif %}
+                </span>
+            </span>
+        </div>
+        {% if cmd.output %}
+            <pre class="history-output">{{ cmd.output[:400] }}{% if cmd.output|length > 400 %}...{% endif %}</pre>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="color: #64748b; text-align:center; padding: 80px;">История команд пуста.</p>
+{% endif %}
+
+{% endblock %}

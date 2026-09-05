@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<a href="/users" class="btn" style="margin-bottom: 20px;">
+    <i class="fas fa-arrow-left"></i> Назад
+</a>
+
+<h1 style="margin-bottom: 32px;">
+    {% if action == 'add' %}Добавить пользователя{% else %}Редактировать: {{ user.login }}{% endif %}
+</h1>
+
+<div class="form-container">
+    <form method="POST">
+        <div class="form-group">
+            <label class="form-label"><i class="fas fa-user"></i> Логин</label>
+            <input type="text" name="login" class="form-input" 
+                   value="{{ user.login if user else '' }}" required placeholder="username">
+        </div>
+        <div class="form-group">
+            <label class="form-label"><i class="fas fa-lock"></i> Пароль</label>
+            <input type="password" name="password" class="form-input" 
+                   value="{{ user.password if user else '' }}" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label class="form-label"><i class="fas fa-shield-alt"></i> Роль</label>
+            <select name="role" class="form-select">
+                <option value="user" {% if user and user.role == 'user' %}selected{% endif %}>
+                    👤 user — обычный пользователь
+                </option>
+                <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>
+                    👑 admin — администратор
+                </option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-ban"></i> Заблокированные IP-адреса роутеров
+            </label>
+            <input type="text" name="blocked_ips" class="form-input" 
+                   value="{{ user.blocked_ips if user else '' }}"
+                   placeholder="192.168.1.1, 10.0.0.1, 172.16.0.254">
+            <small style="color: #64748b; display: block; margin-top: 6px;">
+                Перечислите IP-адреса через запятую. Пользователь не сможет подключаться к этим устройствам.
+            </small>
+        </div>
+        <button type="submit" class="btn btn-full" style="margin-top: 8px;">
+            <i class="fas fa-save"></i> 
+            {% if action == 'add' %}Создать пользователя{% else %}Сохранить изменения{% endif %}
+        </button>
+    </form>
+</div>
+
+{% endblock %}

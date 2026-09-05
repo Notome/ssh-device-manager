@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<a href="/" class="btn" style="margin-bottom: 20px;">
+    <i class="fas fa-arrow-left"></i> Назад
+</a>
+
+<h1 style="margin-bottom: 32px;">Добавить устройство</h1>
+
+<div class="form-container">
+    <form method="POST">
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input type="text" name="name" class="form-input" placeholder="Router-01" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">IP-адрес</label>
+            <input type="text" name="ip" class="form-input" placeholder="192.168.1.1" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Тип устройства (метка)</label>
+            <input type="text" name="type" class="form-input" placeholder="Router, Switch, Firewall...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">ОС устройства</label>
+            <select name="os_type" class="form-select">
+                {% for key, label in os_labels.items() %}
+                <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Логин SSH</label>
+            <input type="text" name="username" class="form-input" placeholder="admin">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Пароль SSH</label>
+            <input type="password" name="password" class="form-input" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Статус</label>
+            <select name="status" class="form-select">
+                <option value="offline">Offline</option>
+                <option value="online">Online</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-full" style="margin-top: 8px;">
+            <i class="fas fa-plus-circle"></i> Добавить устройство
+        </button>
+    </form>
+</div>
+
+{% endblock %}

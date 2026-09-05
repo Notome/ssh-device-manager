@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <h1 class="page-title">Network Devices</h1>
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Название</th><th>IP</th><th>Тип</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr>
+                <td><strong>{{ device[1] }}</strong></td>
+                <td><code style="font-family:'JetBrains Mono',monospace; font-size:0.83rem; color:var(--text-2);">{{ device[2] }}</code></td>
+                <td style="color:var(--text-2); font-size:0.86rem;">{{ device[3] or '—' }}</td>
+                <td>
+                    <span class="status {% if device[4] == 'online' %}online{% else %}offline{% endif %}">
+                        <span class="dot"></span> {{ device[4]|upper }}
+                    </span>
+                </td>
+                <td>
+                    <a href="/device/{{ device[0] }}" class="btn" style="padding:6px 14px; font-size:0.82rem;">
+                        <i class="fas fa-terminal"></i> Открыть
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
